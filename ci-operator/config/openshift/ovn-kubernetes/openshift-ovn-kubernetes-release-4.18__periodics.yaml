@@ -86,6 +86,8 @@ tests:
         FEATURE_SET=TechPreviewNoUpgrade
       EXTRA_MG_ARGS: --host-network
       EXTRA_NETWORK_CONFIG: |
+        # https://issues.redhat.com/browse/OCPBUGS-52194
+        DHCP_LEASE_EXPIRY=0
         EXTRA_NETWORK_NAMES="extranet"
         EXTRANET_NETWORK_SUBNET_V4='192.168.221.0/24'
         EXTRANET_NETWORK_SUBNET_V6='fd2e:6f44:5dd8:ca56::/120'
