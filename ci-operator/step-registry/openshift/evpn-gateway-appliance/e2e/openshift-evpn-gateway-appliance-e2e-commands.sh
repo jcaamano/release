@@ -14,11 +14,14 @@ ssh_opts="-i ${CLUSTER_PROFILE_DIR}/ssh-privatekey -o StrictHostKeyChecking=no -
 echo "e2e: target VM ${remote}"
 
 # Install what load.sh/build.sh/run.sh need and enable the podman socket. Wait for sshd first
-# (the ec2 chain waits for instance-status-ok, not sshd).
+# (the ec2 chain waits for instance-status-ok, not sshd). `podman network reset` regenerates the
+# default network with the installed podman/netavark: the AMI can ship a default network written
+# in an older format ("options":[]) that a bumped netavark rejects ("invalid type: sequence,
+# expected a map"), which would otherwise break the registry and the containerlab network.
 # shellcheck disable=SC2086  # ssh_opts is intentionally word-split
 for _ in $(seq 1 30); do ssh ${ssh_opts} "${remote}" true 2>/dev/null && break; sleep 10; done
 # shellcheck disable=SC2086
-ssh ${ssh_opts} "${remote}" 'sudo dnf install -y podman skopeo make && sudo systemctl enable --now podman.socket'
+ssh ${ssh_opts} "${remote}" 'sudo dnf install -y podman skopeo make && sudo systemctl enable --now podman.socket && sudo podman network reset -f'
 
 # Run the baked run_remote.sh in remote mode, passing all its inputs explicitly.
 exec env \
